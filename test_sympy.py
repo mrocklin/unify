@@ -24,3 +24,13 @@ def test_unify():
     a, b, c = map(Wild, 'abc')
     pattern = Basic(a, b, c)
     assert list(unify(expr, pattern, {})) == [{a: 1, b: 2, c: 3}]
+
+def test_unify_iter():
+    expr = Add(1, 2, 3, evaluate=False)
+    a, b, c = map(Wild, 'abc')
+    pattern = Add(a, c)
+    print list(unify(expr, pattern, {}))
+    assert is_associative(destruct(pattern))
+    assert list(unify(expr, pattern, {})) == \
+            [{a: 1, c: Add(2, 3, evaluate=False)},
+             {a: Add(1, 2, evaluate=False), c: 3}]

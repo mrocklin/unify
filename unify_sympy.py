@@ -3,10 +3,10 @@ from unify import Compound, Variable, _unify
 
 def destruct(s):
     """ Turn a SymPy object into a Compound Tuple """
-    if not isinstance(s, Basic):
-        return s
     if isinstance(s, Wild):
         return Variable(s)
+    if not isinstance(s, Basic) or s.is_Atom:
+        return s
     return Compound(s.__class__, tuple(map(destruct, s.args)))
 
 def construct(t):
@@ -15,7 +15,7 @@ def construct(t):
         return t.arg
     if not isinstance(t, Compound):
         return t
-    return t.op(*map(construct, t.args))
+    return Basic.__new__(t.op, *map(construct, t.args))
 
 def unify(x, y, s):
     ds = _unify(destruct(x), destruct(y), {})
