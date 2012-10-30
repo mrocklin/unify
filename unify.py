@@ -122,13 +122,12 @@ def partition(it, part):
 
 def is_associative(x):
     from sympy import Add, Mul
-    return (isinstance(x, Compound) and (x.op in {'Add', 'Mul'}
+    return (isinstance(x, Compound) and (x.op in {'Add', 'Mul', 'CAdd', 'CMul'}
          or x.op in (Add, Mul)))
     # TODO: need a more general way to test for associativity
 
 def is_commutative(x):
-    # TODO
-    return False
+    return (isinstance(x, Compound) and (x.op in {'CAdd', 'CMul'}))
 
 def kbin(l, k, ordered=True):
     """
