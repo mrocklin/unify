@@ -38,12 +38,12 @@ def _unify(x, y, s):
                     for x in _unify(aa, bb, sop): yield x
 
     elif iterable(x) and iterable(y) and len(x) == len(y):
-        if len(x) != 0:
+        if len(x) == 0:
+            yield s
+        else:
             for shead in _unify(x[0], y[0], s):
                 for x in _unify(x[1:], y[1:], shead):
                     yield x
-        else:
-            yield s
 
 def _unify_var(var, x, s):
     # print 'UnVar: ', var, x, s
