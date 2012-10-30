@@ -1,3 +1,20 @@
+""" Generic Unification algorithm for expression trees with lists of children
+
+The implementation is a direct translation of
+
+Artificial Intelligence: A Modern Approach
+by
+Stuart Russel and Peter Norvig
+
+
+It is modified in the following ways:
+
+1.  We allow associative and commutative Compound expressions. This results in
+    combinatorial blowup.
+2.  We provide generic interfaces to symbolic algebra libraries in Python.
+"""
+
+
 from collections import namedtuple
 Compound = namedtuple('Compound', 'op args')
 Variable = namedtuple('Variable', 'arg')
