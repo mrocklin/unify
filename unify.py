@@ -1,27 +1,28 @@
 from collections import namedtuple
 Compound = namedtuple('Compound', 'op args')
 Variable = namedtuple('Variable', 'arg')
+CondVariable = namedtuple('Variable', 'arg valid')
 
 def iterable(x):
     """ Is x a traditional iterable? """
     return type(x) in (tuple, list, set)
 
-def _unify(x, y, s):
+def _unify(x, y, s, **fns):
     # print 'Unify: ', x, y, s
     if s == None:
         pass
     elif x == y:
         yield s
-    elif isinstance(x, Variable):
-        for x in _unify_var(x, y, s): yield x
-    elif isinstance(y, Variable):
-        for x in _unify_var(y, x, s): yield x
+    elif isinstance(x, (Variable, CondVariable)):
+        for x in _unify_var(x, y, s, **fns): yield x
+    elif isinstance(y, (Variable, CondVariable)):
+        for x in _unify_var(y, x, s, **fns): yield x
     elif isinstance(x, Compound) and isinstance(y, Compound):
-        for sop in _unify(x.op, y.op, s):
+        for sop in _unify(x.op, y.op, s, **fns):
             if sop == None:
                 pass
             elif len(x.args) == len(y.args):
-                for x in _unify(x.args, y.args, sop): yield x
+                for x in _unify(x.args, y.args, sop, **fns): yield x
 
             elif is_associative(x) and is_associative(y):
                 # print 'assoc branch taken'
@@ -35,23 +36,24 @@ def _unify(x, y, s):
                     # print 'bbargs: ', bbargs
                     aa = aaargs
                     bb = [unpack(Compound(b.op, arg)) for arg in bbargs]
-                    for x in _unify(aa, bb, sop): yield x
+                    for x in _unify(aa, bb, sop, **fns): yield x
 
     elif iterable(x) and iterable(y) and len(x) == len(y):
         if len(x) == 0:
             yield s
         else:
-            for shead in _unify(x[0], y[0], s):
-                for x in _unify(x[1:], y[1:], shead):
+            for shead in _unify(x[0], y[0], s, **fns):
+                for x in _unify(x[1:], y[1:], shead, **fns):
                     yield x
 
-def _unify_var(var, x, s):
+def _unify_var(var, x, s, **fns):
     # print 'UnVar: ', var, x, s
     if var in s:
-        for x in _unify(s[var], x, s): yield x
+        for x in _unify(s[var], x, s, **fns): yield x
     elif occur_check(var, x):
         pass
-    else:
+    elif (isinstance(var, CondVariable) and var.valid(fns['construct'])(x)
+        or isinstance(var, Variable)):
         yield assoc(s, var, x)
 
 def occur_check(var, x):
@@ -120,4 +122,6 @@ def partitions(lista,bins):
                     yield [lista[:i]]+part
 
 def is_associative(x):
-    return isinstance(x, Compound) and x.op in {'Add', 'Mul'}
+    from sympy import Add, Mul
+    return (isinstance(x, Compound) and (x.op in {'Add', 'Mul'}
+         or x.op in (Add, Mul)))
