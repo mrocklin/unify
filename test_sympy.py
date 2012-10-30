@@ -41,7 +41,13 @@ def test_unify_iter():
     pattern = Add(a, c, evaluate=False)
     print list(unify(expr, pattern, {}))
     assert is_associative(destruct(pattern))
+    assert is_commutative(destruct(pattern))
+
     result   = list(unify(expr, pattern, {}))
     expected = [{a: 1, c: Add(2, 3, evaluate=False)},
-                {a: Add(1, 2, evaluate=False), c: 3}]
+                {a: 2, c: Add(1, 3, evaluate=False)},
+                {a: 3, c: Add(1, 2, evaluate=False)},
+                {a: Add(1, 2, evaluate=False), c: 3},
+                {a: Add(1, 3, evaluate=False), c: 2},
+                {a: Add(2, 3, evaluate=False), c: 1}]
     assert setdicteq(result, expected)

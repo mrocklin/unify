@@ -127,7 +127,9 @@ def is_associative(x):
     # TODO: need a more general way to test for associativity
 
 def is_commutative(x):
-    return (isinstance(x, Compound) and (x.op in {'CAdd', 'CMul'}))
+    from sympy import Add, Mul
+    return (isinstance(x, Compound) and (x.op in {'CAdd', 'CMul'}) or
+            x.op in (Add, Mul))
 
 def kbin(l, k, ordered=True):
     """
