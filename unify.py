@@ -42,13 +42,17 @@ def _unify(x, y, s, **fns):
                 for x in _unify(x.args, y.args, sop, **fns): yield x
 
             elif is_associative(x) and is_associative(y):
+                a, b = minmax(x, y)
+                if is_commutative(x) and is_commutative(y):
+                    combinations = combinations_comm(a.args, b.args)
+                else:
+                    combinations = combinations_assoc(a.args, b.args)
                 # print 'assoc branch taken'
                 # print 'x: ', x
                 # print 'y: ', y
-                a, b = minmax(x, y)
                 # print 'a: ', a
                 # print 'b: ', b
-                for aaargs, bbargs in combinations_assoc(a.args, b.args):
+                for aaargs, bbargs in combinations:
                     # print 'aaargs: ', aaargs
                     # print 'bbargs: ', bbargs
                     aa = aaargs
@@ -104,6 +108,10 @@ def combinations_assoc(A, B):
         for part in partitions(range(len(B)), len(A)):
             yield A, partition(B, part)
 
+def combinations_comm(A, B):
+    # TODO
+    return (A, B)
+
 def minmax(A, B):
     if len(A.args) < len(B.args):
         return A, B
@@ -142,3 +150,7 @@ def is_associative(x):
     from sympy import Add, Mul
     return (isinstance(x, Compound) and (x.op in {'Add', 'Mul'}
          or x.op in (Add, Mul)))
+
+def is_commutative(x):
+    # TODO
+    return False
