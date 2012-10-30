@@ -7,7 +7,7 @@ def iterable(x):
     return type(x) in (tuple, list, set)
 
 def _unify(x, y, s):
-    print 'Unify: ', x, y, s
+    # print 'Unify: ', x, y, s
     if s == None:
         pass
     elif x == y:
@@ -20,24 +20,33 @@ def _unify(x, y, s):
         for sop in _unify(x.op, y.op, s):
             if sop == None:
                 pass
-            elif len(x) == len(y):
+            elif len(x.args) == len(y.args):
                 for x in _unify(x.args, y.args, sop): yield x
 
             elif is_associative(x) and is_associative(y):
-                for xxargs, yyargs in combinations_assoc(x.args, y.args):
-                    xx = [unpack(Compound(x.op, arg)) for arg in xxargs]
-                    yy = [unpack(Compound(y.op, arg)) for arg in yyargs]
-                    for x in _unify(xx, yy, sop): yield x
+                # print 'assoc branch taken'
+                # print 'x: ', x
+                # print 'y: ', y
+                a, b = minmax(x, y)
+                # print 'a: ', a
+                # print 'b: ', b
+                for aaargs, bbargs in combinations_assoc(a.args, b.args):
+                    # print 'aaargs: ', aaargs
+                    # print 'bbargs: ', bbargs
+                    aa = aaargs
+                    bb = [unpack(Compound(b.op, arg)) for arg in bbargs]
+                    for x in _unify(aa, bb, sop): yield x
 
     elif iterable(x) and iterable(y) and len(x) == len(y):
-        for shead in _unify(x[0], y[0], s):
-            for x in _unify(x[1:], y[1:], shead):
-                yield x
-    else:
-        pass
+        if len(x) != 0:
+            for shead in _unify(x[0], y[0], s):
+                for x in _unify(x[1:], y[1:], shead):
+                    yield x
+        else:
+            yield s
 
 def _unify_var(var, x, s):
-    print 'UnVar: ', var, x, s
+    # print 'UnVar: ', var, x, s
     if var in s:
         for x in _unify(s[var], x, s): yield x
     elif occur_check(var, x):
@@ -68,16 +77,19 @@ def unpack(x):
         return x
 
 def combinations_assoc(A, B):
+    """ A is small, B is Big """
+    assert len(A) <= len(B)
     if len(A) == len(B):
         yield A, B
     else:
-        if len(A) < len(B):
-            small, big = A, B
-        else:
-            small, big = B, A
+        for part in partitions(range(len(B)), len(A)):
+            yield A, partition(B, part)
 
-        for part in partitions(range(len(big)), len(small)):
-            yield small, partition(big, part)
+def minmax(A, B):
+    if len(A.args) < len(B.args):
+        return A, B
+    else:
+        return B, A
 
 
 def index(it, ind):
@@ -107,3 +119,5 @@ def partitions(lista,bins):
                 if len([lista[:i]]+part)==bins:
                     yield [lista[:i]]+part
 
+def is_associative(x):
+    return isinstance(x, Compound) and x.op in {'Add', 'Mul'}
