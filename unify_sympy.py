@@ -10,7 +10,7 @@ def destruct(s):
     return Compound(s.__class__, tuple(map(destruct, s.args)))
 
 def construct(t):
-    """ Turn a Compount Tuple into a SymPy object """
+    """ Turn a Compound Tuple into a SymPy object """
     if isinstance(t, Variable):
         return t.arg
     if not isinstance(t, Compound):

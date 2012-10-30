@@ -92,7 +92,9 @@ def unpack(x):
         return x
 
 def combinations_assoc(A, B):
-    """ A is small, B is Big """
+    """ A is small, B is Big
+
+    """
     assert len(A) <= len(B)
     if len(A) == len(B):
         yield A, B
@@ -130,6 +132,12 @@ def partition(it, part):
     return t([index(it, ind) for ind in part])
 
 def partitions(lista,bins):
+    """
+    Taken from StackOverflow. Written by @EnricoGiampieri.
+
+    See the following link for discussion
+    http://stackoverflow.com/questions/13131491/partition-n-items-into-k-bins-in-python-lazily
+    """
     if len(lista)==1 or bins==1:
         yield [lista]
     elif len(lista)>1 and bins>1:
@@ -142,6 +150,7 @@ def is_associative(x):
     from sympy import Add, Mul
     return (isinstance(x, Compound) and (x.op in {'Add', 'Mul'}
          or x.op in (Add, Mul)))
+    # TODO: need a more general way to test for associativity
 
 def is_commutative(x):
     # TODO
