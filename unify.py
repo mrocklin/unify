@@ -7,37 +7,43 @@ def iterable(x):
     return type(x) in (tuple, list, set)
 
 def _unify(x, y, s):
-    print x, y, s
+    print 'Unify: ', x, y, s
     if s == None:
-        return None
+        pass
     elif x == y:
-        return s
+        yield s
     elif isinstance(x, Variable):
-        return _unify_var(x, y, s)
+        for x in _unify_var(x, y, s): yield x
     elif isinstance(y, Variable):
-        return _unify_var(y, x, s)
+        for x in _unify_var(y, x, s): yield x
     elif isinstance(x, Compound) and isinstance(y, Compound):
-        return _unify(x.args, y.args, _unify(x.op, y.op, s))
-        if is_commutative(x) and is_commutative(y):
-            pass
-        elif is_associative(x) and is_associative(y):
-            pass
-        combinations = [[x,y]] # Kludge
-        for xx, yy in combinations:
-            pass
-            # Yield
+        for sop in _unify(x.op, y.op, s):
+            if sop == None:
+                pass
+            elif len(x) == len(y):
+                for x in _unify(x.args, y.args, sop): yield x
+
+            elif is_associative(x) and is_associative(y):
+                for xxargs, yyargs in combinations_assoc(x.args, y.args):
+                    xx = [unpack(Compound(x.op, arg)) for arg in xxargs]
+                    yy = [unpack(Compound(y.op, arg)) for arg in yyargs]
+                    for x in _unify(xx, yy, sop): yield x
+
     elif iterable(x) and iterable(y) and len(x) == len(y):
-        return _unify(x[1:], y[1:], _unify(x[0], y[0], s))
+        for shead in _unify(x[0], y[0], s):
+            for x in _unify(x[1:], y[1:], shead):
+                yield x
     else:
-        return None
+        pass
 
 def _unify_var(var, x, s):
+    print 'UnVar: ', var, x, s
     if var in s:
-        return _unify(s[var], x, s)
+        for x in _unify(s[var], x, s): yield x
     elif occur_check(var, x):
-        return None
+        pass
     else:
-        return assoc(s, var, x)
+        yield assoc(s, var, x)
 
 def occur_check(var, x):
     "Return true if var occurs anywhere in x."
@@ -54,6 +60,12 @@ def assoc(d, key, val):
     d = d.copy()
     d[key] = val
     return d
+
+def unpack(x):
+    if isinstance(x, Compound) and len(x.args) == 1:
+        return x.args[0]
+    else:
+        return x
 
 def combinations_assoc(A, B):
     if len(A) == len(B):
@@ -94,3 +106,4 @@ def partitions(lista,bins):
             for part in partitions(lista[i:],bins-1):
                 if len([lista[:i]]+part)==bins:
                     yield [lista[:i]]+part
+
