@@ -40,21 +40,13 @@ def _unify(x, y, s, **fns):
                 pass
             elif len(x.args) == len(y.args):
                 for x in _unify(x.args, y.args, sop, **fns): yield x
-
             elif is_associative(x) and is_associative(y):
                 a, b = minmax(x, y)
                 if is_commutative(x) and is_commutative(y):
                     combinations = combinations_comm(a.args, b.args)
                 else:
                     combinations = combinations_assoc(a.args, b.args)
-                # print 'assoc branch taken'
-                # print 'x: ', x
-                # print 'y: ', y
-                # print 'a: ', a
-                # print 'b: ', b
                 for aaargs, bbargs in combinations:
-                    # print 'aaargs: ', aaargs
-                    # print 'bbargs: ', bbargs
                     aa = aaargs
                     bb = [unpack(Compound(b.op, arg)) for arg in bbargs]
                     for x in _unify(aa, bb, sop, **fns): yield x
