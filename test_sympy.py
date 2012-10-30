@@ -25,12 +25,23 @@ def test_unify():
     pattern = Basic(a, b, c)
     assert list(unify(expr, pattern, {})) == [{a: 1, b: 2, c: 3}]
 
+def setsetstr(a):
+    return set(frozenset(str(item) for item in ael.items()) for ael in a)
+def setdicteq(a, b):
+    return setsetstr(a) == setsetstr(b)
+
+def test_listdictseteq():
+    a = [{1:1, 2:2, 3:3}, {2:2, 3:3}]
+    b = [{2:2, 3:3}, {1:1, 2:2, 3:3}]
+    assert setdicteq(a, b)
+
 def test_unify_iter():
     expr = Add(1, 2, 3, evaluate=False)
     a, b, c = map(Wild, 'abc')
-    pattern = Add(a, c)
+    pattern = Add(a, c, evaluate=False)
     print list(unify(expr, pattern, {}))
     assert is_associative(destruct(pattern))
-    assert list(unify(expr, pattern, {})) == \
-            [{a: 1, c: Add(2, 3, evaluate=False)},
-             {a: Add(1, 2, evaluate=False), c: 3}]
+    result   = list(unify(expr, pattern, {}))
+    expected = [{a: 1, c: Add(2, 3, evaluate=False)},
+                {a: Add(1, 2, evaluate=False), c: 3}]
+    assert setdicteq(result, expected)
