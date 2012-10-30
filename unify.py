@@ -40,7 +40,7 @@ def _unify(x, y, s, **fns):
             elif is_associative(x) and is_associative(y):
                 a, b = (x, y) if len(x.args) < len(y.args) else (y, x)
                 if is_commutative(x) and is_commutative(y):
-                    combinations = allcombinations(a.args, b.args, False)
+                    combinations = allcombinations(a.args, b.args, None)
                 else:
                     combinations = allcombinations(a.args, b.args, True)
                 for aaargs, bbargs in combinations:
@@ -67,7 +67,7 @@ def _unify_var(var, x, s, **fns):
         yield assoc(s, var, x)
 
 def occur_check(var, x):
-    "Return true if var occurs anywhere in x."
+    """ Return true if var occurs anywhere in x """
     if var == x:
         return True
     elif isinstance(x, Compound):
@@ -101,7 +101,6 @@ def allcombinations(A, B, ordered):
             yield A, partition(B, part)
         else:
             yield partition(A, part), B
-
 
 def index(it, ind):
     """ Fancy indexing into an iterable

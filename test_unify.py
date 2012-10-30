@@ -35,7 +35,9 @@ def test_combinations_assoc():
     print list(allcombinations((1,2,3), (a,b), True))
     assert set(allcombinations((1,2,3), (a,b), True)) == \
             {(((1, 2), (3,)), (a, b)), (((1,), (2, 3)), (a, b))}
-def _test_combinations_comm():
-    print list(allcombinations((1,2,3), (a,b), False))
-    assert set(allcombinations((1,2,3), (a,b), False)) == {(((1, 2), (3,)), (a, b)),
-                                                        (((1,), (2, 3)), (a, b))}
+def test_combinations_comm():
+    print list(allcombinations((1,2,3), (a,b), None))
+    assert set(allcombinations((1,2,3), (a,b), None)) == \
+            {(((1,), (2, 3)), ('a', 'b')), (((2,), (3, 1)), ('a', 'b')),
+             (((3,), (1, 2)), ('a', 'b')), (((1, 2), (3,)), ('a', 'b')),
+             (((2, 3), (1,)), ('a', 'b')), (((3, 1), (2,)), ('a', 'b'))}
