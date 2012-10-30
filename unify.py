@@ -26,9 +26,7 @@ def iterable(x):
 
 def _unify(x, y, s, **fns):
     # print 'Unify: ', x, y, s
-    if s == None:
-        pass
-    elif x == y:
+    if x == y:
         yield s
     elif isinstance(x, (Variable, CondVariable)):
         for x in _unify_var(x, y, s, **fns): yield x
@@ -36,9 +34,7 @@ def _unify(x, y, s, **fns):
         for x in _unify_var(y, x, s, **fns): yield x
     elif isinstance(x, Compound) and isinstance(y, Compound):
         for sop in _unify(x.op, y.op, s, **fns):
-            if sop == None:
-                pass
-            elif len(x.args) == len(y.args):
+            if len(x.args) == len(y.args):
                 for x in _unify(x.args, y.args, sop, **fns): yield x
             elif is_associative(x) and is_associative(y):
                 a, b = minmax(x, y)
