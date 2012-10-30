@@ -30,3 +30,12 @@ def test_associative():
     result = list(_unify(c1, c2, {}))
     assert tuple(_unify(c1, c2, {})) == ({x: 1, y: C('Add', (2, 3))},
                                          {x: C('Add', (1, 2)), y: 3})
+
+def test_combinations_assoc():
+    print list(allcombinations((1,2,3), (a,b), True))
+    assert set(allcombinations((1,2,3), (a,b), True)) == \
+            {(((1, 2), (3,)), (a, b)), (((1,), (2, 3)), (a, b))}
+def _test_combinations_comm():
+    print list(allcombinations((1,2,3), (a,b), False))
+    assert set(allcombinations((1,2,3), (a,b), False)) == {(((1, 2), (3,)), (a, b)),
+                                                        (((1,), (2, 3)), (a, b))}

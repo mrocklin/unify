@@ -16,6 +16,7 @@ It is modified in the following ways:
 
 
 from collections import namedtuple
+from itertools import combinations
 Compound = namedtuple('Compound', 'op args')
 Variable = namedtuple('Variable', 'arg')
 CondVariable = namedtuple('Variable', 'arg valid')
@@ -37,11 +38,11 @@ def _unify(x, y, s, **fns):
             if len(x.args) == len(y.args):
                 for x in _unify(x.args, y.args, sop, **fns): yield x
             elif is_associative(x) and is_associative(y):
-                a, b = minmax(x, y)
+                a, b = (x, y) if len(x.args) < len(y.args) else (y, x)
                 if is_commutative(x) and is_commutative(y):
-                    combinations = combinations_comm(a.args, b.args)
+                    combinations = allcombinations(a.args, b.args, False)
                 else:
-                    combinations = combinations_assoc(a.args, b.args)
+                    combinations = allcombinations(a.args, b.args, True)
                 for aaargs, bbargs in combinations:
                     aa = aaargs
                     bb = [unpack(Compound(b.op, arg)) for arg in bbargs]
@@ -87,26 +88,19 @@ def unpack(x):
     else:
         return x
 
-def combinations_assoc(A, B):
-    """ A is small, B is Big
+def allcombinations(A, B, ordered):
+    """
 
     """
-    assert len(A) <= len(B)
     if len(A) == len(B):
         yield A, B
-    else:
-        for part in partitions(range(len(B)), len(A)):
+        raise StopIteration()
+    sm, bg = (A, B) if len(A) < len(B) else (B, A)
+    for part in kbin(range(len(bg)), len(sm), ordered=ordered):
+        if bg == B:
             yield A, partition(B, part)
-
-def combinations_comm(A, B):
-    # TODO
-    return (A, B)
-
-def minmax(A, B):
-    if len(A.args) < len(B.args):
-        return A, B
-    else:
-        return B, A
+        else:
+            yield partition(A, part), B
 
 
 def index(it, ind):
@@ -127,21 +121,6 @@ def partition(it, part):
     t = type(it)
     return t([index(it, ind) for ind in part])
 
-def partitions(lista,bins):
-    """
-    Taken from StackOverflow. Written by @EnricoGiampieri.
-
-    See the following link for discussion
-    http://stackoverflow.com/questions/13131491/partition-n-items-into-k-bins-in-python-lazily
-    """
-    if len(lista)==1 or bins==1:
-        yield [lista]
-    elif len(lista)>1 and bins>1:
-        for i in range(1,len(lista)):
-            for part in partitions(lista[i:],bins-1):
-                if len([lista[:i]]+part)==bins:
-                    yield [lista[:i]]+part
-
 def is_associative(x):
     from sympy import Add, Mul
     return (isinstance(x, Compound) and (x.op in {'Add', 'Mul'}
@@ -151,3 +130,81 @@ def is_associative(x):
 def is_commutative(x):
     # TODO
     return False
+
+def kbin(l, k, ordered=True):
+    """
+    Return sequence ``l`` partitioned into ``k`` bins.
+    If ordered is True then the order of the items in the
+    flattened partition will be the same as the order of the
+    items in ``l``; if False, all permutations of the items will
+    be given; if None, only unique permutations for a given
+    partition will be given.
+
+    Examples
+    ========
+
+    >>> from sympy.utilities.iterables import kbin
+    >>> for p in kbin(range(3), 2):
+    ...     print p
+    ...
+    [[0], [1, 2]]
+    [[0, 1], [2]]
+    >>> for p in kbin(range(3), 2, ordered=False):
+    ...     print p
+    ...
+    [(0,), (1, 2)]
+    [(0,), (2, 1)]
+    [(1,), (0, 2)]
+    [(1,), (2, 0)]
+    [(2,), (0, 1)]
+    [(2,), (1, 0)]
+    [(0, 1), (2,)]
+    [(0, 2), (1,)]
+    [(1, 0), (2,)]
+    [(1, 2), (0,)]
+    [(2, 0), (1,)]
+    [(2, 1), (0,)]
+    >>> for p in kbin(range(3), 2, ordered=None):
+    ...     print p
+    ...
+    [[0], [1, 2]]
+    [[1], [2, 0]]
+    [[2], [0, 1]]
+    [[0, 1], [2]]
+    [[1, 2], [0]]
+    [[2, 0], [1]]
+
+    """
+    from sympy.utilities.iterables import partitions
+    from itertools import permutations
+    def rotations(seq):
+        for i in range(len(seq)):
+            yield seq
+            seq.append(seq.pop(0))
+    if ordered is None:
+        func = rotations
+    else:
+        func = permutations
+    for p in partitions(len(l), k):
+        if sum(p.values()) != k:
+            continue
+        for pe in permutations(p.keys()):
+            rv = []
+            i = 0
+            for part in pe:
+                for do in range(p[part]):
+                    j = i + part
+                    rv.append(l[i: j])
+                    i = j
+            if ordered:
+                yield rv
+            else:
+                template = [len(i) for i in rv]
+                for pp in func(l):
+                    rvp = []
+                    ii = 0
+                    for t in template:
+                        jj = ii + t
+                        rvp.append(pp[ii: jj])
+                        ii = jj
+                    yield rvp
