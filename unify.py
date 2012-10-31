@@ -6,13 +6,17 @@ Artificial Intelligence: A Modern Approach
 by
 Stuart Russel and Peter Norvig
 
+Second edition, section 9.2, page 276
 
 It is modified in the following ways:
 
 1.  We allow associative and commutative Compound expressions. This results in
     combinatorial blowup.
-3.  We explore the tree lazily
+2.  We explore the tree lazily
 3.  We provide generic interfaces to symbolic algebra libraries in Python.
+
+A more traditional version can be found here
+http://aima.cs.berkeley.edu/python/logic.html
 """
 
 from collections import namedtuple
