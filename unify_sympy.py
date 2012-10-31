@@ -26,7 +26,7 @@ def _build(t):
     if not isinstance(t, Compound):
         return t
     # This does auto-evaluation. Watch out!
-    return t.op(*map(construct, t.args))
+    return t.op(*map(_build, t.args))
 
 def construct(t):
     """ Turn a Compound Tuple into a SymPy object """
