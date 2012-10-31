@@ -1,5 +1,12 @@
 from sympy import Basic, Wild
+from sympy.core.operations import AssocOp
 from unify import Compound, Variable, _unify
+
+def is_associative(x):
+    return isinstance(x, Compound) and issubclass(x.op, AssocOp)
+
+def is_commutative(x):
+    return isinstance(x, Compound) and _build(x).is_commutative
 
 def destruct(s):
     """ Turn a SymPy object into a Compound Tuple """
@@ -8,6 +15,14 @@ def destruct(s):
     if not isinstance(s, Basic) or s.is_Atom:
         return s
     return Compound(s.__class__, tuple(map(destruct, s.args)))
+
+def _build(t):
+    if isinstance(t, Variable):
+        return t.arg
+    if not isinstance(t, Compound):
+        return t
+    # This does auto-evaluation. Watch out!
+    return t.op(*map(construct, t.args))
 
 def construct(t):
     """ Turn a Compound Tuple into a SymPy object """
@@ -34,6 +49,7 @@ def unify(x, y, s):
     [{p_: z, q_: x + y}, {p_: y + z, q_: x}]
     """
 
-    ds = _unify(destruct(x), destruct(y), {})
+    ds = _unify(destruct(x), destruct(y), {}, is_associative=is_associative,
+                                              is_commutative=is_commutative)
     for d in ds:
         yield {construct(k): construct(v) for k, v in d.items()}

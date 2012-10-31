@@ -1,6 +1,7 @@
 from sympy import Add, Basic, Wild
 from unify import *
-from unify_sympy import destruct, construct, unify
+from unify_sympy import (destruct, construct, unify, is_associative,
+        is_commutative)
 
 def test_destruct():
     expr     = Basic(1, 2, 3)

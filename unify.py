@@ -35,6 +35,8 @@ def _unify(x, y, s, **fns):
     elif isinstance(y, (Variable, CondVariable)):
         for x in _unify_var(y, x, s, **fns): yield x
     elif isinstance(x, Compound) and isinstance(y, Compound):
+        is_commutative = fns.get('is_commutative', lambda x: False)
+        is_associative = fns.get('is_associative', lambda x: False)
         for sop in _unify(x.op, y.op, s, **fns):
             if len(x.args) == len(y.args):
                 for x in _unify(x.args, y.args, sop, **fns): yield x
@@ -69,7 +71,7 @@ def _unify_var(var, x, s, **fns):
         yield assoc(s, var, x)
 
 def occur_check(var, x):
-    """ Return true if var occurs anywhere in x """
+    """ var occurs in subtree owned by x? """
     if var == x:
         return True
     elif isinstance(x, Compound):
@@ -121,17 +123,6 @@ def partition(it, part):
 
     t = type(it)
     return t([index(it, ind) for ind in part])
-
-def is_associative(x):
-    from sympy import Add, Mul
-    return (isinstance(x, Compound) and (x.op in {'Add', 'Mul', 'CAdd', 'CMul'}
-         or x.op in (Add, Mul)))
-    # TODO: need a more general way to test for associativity
-
-def is_commutative(x):
-    from sympy import Add, Mul
-    return (isinstance(x, Compound) and (x.op in {'CAdd', 'CMul'}) or
-            x.op in (Add, Mul))
 
 def kbin(l, k, ordered=True):
     """
