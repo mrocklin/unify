@@ -11,7 +11,8 @@ It is modified in the following ways:
 
 1.  We allow associative and commutative Compound expressions. This results in
     combinatorial blowup.
-2.  We provide generic interfaces to symbolic algebra libraries in Python.
+3.  We explore the tree lazily
+3.  We provide generic interfaces to symbolic algebra libraries in Python.
 """
 
 
