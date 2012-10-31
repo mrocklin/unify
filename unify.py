@@ -62,8 +62,9 @@ def _unify_var(var, x, s, **fns):
         for x in _unify(s[var], x, s, **fns): yield x
     elif occur_check(var, x):
         pass
-    elif (isinstance(var, CondVariable) and var.valid(fns['construct'])(x)
-        or isinstance(var, Variable)):
+    elif isinstance(var, CondVariable) and var.valid(x):
+        yield assoc(s, var, x)
+    elif isinstance(var, Variable):
         yield assoc(s, var, x)
 
 def occur_check(var, x):

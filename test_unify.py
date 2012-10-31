@@ -36,7 +36,7 @@ def test_commutative():
     c2 = C('CAdd', (x,y))
     result = list(_unify(c1, c2, {}))
     print result
-    assert {x: 1, y: C('CAdd', (2, 3))} in result
+    assert  {x: 1, y: C('CAdd', (2, 3))} in result
     assert ({x: 2, y: C('CAdd', (1, 3))} in result or
             {x: 2, y: C('CAdd', (3, 1))} in result)
 
@@ -51,3 +51,17 @@ def test_combinations_comm():
             {(((1,), (2, 3)), ('a', 'b')), (((2,), (3, 1)), ('a', 'b')),
              (((3,), (1, 2)), ('a', 'b')), (((1, 2), (3,)), ('a', 'b')),
              (((2, 3), (1,)), ('a', 'b')), (((3, 1), (2,)), ('a', 'b'))}
+
+def test_CondVariable():
+    expr = C('CAdd', (1, 2))
+    x = Variable('x')
+    y = CondVariable('y', lambda a: a % 2 == 0)
+    z = CondVariable('z', lambda a: a > 3)
+    pattern = C('CAdd', (x, y))
+    assert list(_unify(expr, pattern, {})) == \
+            [{x: 1, y: 2}]
+
+    z = CondVariable('z', lambda a: a > 3)
+    pattern = C('CAdd', (z, y))
+
+    assert list(_unify(expr, pattern, {})) == []
