@@ -22,10 +22,6 @@ Compound = namedtuple('Compound', 'op args')
 Variable = namedtuple('Variable', 'arg')
 CondVariable = namedtuple('Variable', 'arg valid')
 
-def iterable(x):
-    """ Is x a traditional iterable? """
-    return type(x) in (tuple, list, set)
-
 def _unify(x, y, s, **fns):
     # print 'Unify: ', x, y, s
     if x == y:
@@ -86,6 +82,10 @@ def assoc(d, key, val):
     d[key] = val
     return d
 
+def iterable(x):
+    """ Is x a traditional iterable? """
+    return type(x) in (tuple, list, set)
+
 def unpack(x):
     if isinstance(x, Compound) and len(x.args) == 1:
         return x.args[0]
@@ -94,7 +94,26 @@ def unpack(x):
 
 def allcombinations(A, B, ordered):
     """
+    Restructure A and B to have the same number of elements
 
+    Assuming either
+    associativity - ordered == True
+    commutativity - ordered == None
+
+    A and B can be rearranged so that the larger of the two lists is
+    reorganized into smaller sublists.
+
+    >>> for x in allcombinations((1, 2, 3), (5, 6), True): print x
+    (((1,), (2, 3)), (5, 6))
+    (((1, 2), (3,)), (5, 6))
+
+    >>> for x in allcombinations((1, 2, 3), (5, 6), None): print x
+    (((1,), (2, 3)), (5, 6))
+    (((2,), (3, 1)), (5, 6))
+    (((3,), (1, 2)), (5, 6))
+    (((1, 2), (3,)), (5, 6))
+    (((2, 3), (1,)), (5, 6))
+    (((3, 1), (2,)), (5, 6))
     """
     if len(A) == len(B):
         yield A, B
@@ -106,14 +125,6 @@ def allcombinations(A, B, ordered):
         else:
             yield partition(A, part), B
 
-def index(it, ind):
-    """ Fancy indexing into an iterable
-
-    >>> index([10, 20, 30], (1, 2, 0))
-    [20, 30, 10]
-    """
-    return type(it)([it[i] for i in ind])
-
 def partition(it, part):
     """ Partition an iterable into pieces defined by indices
 
@@ -123,6 +134,15 @@ def partition(it, part):
 
     t = type(it)
     return t([index(it, ind) for ind in part])
+
+
+def index(it, ind):
+    """ Fancy indexing into an iterable
+
+    >>> index([10, 20, 30], (1, 2, 0))
+    [20, 30, 10]
+    """
+    return type(it)([it[i] for i in ind])
 
 def kbin(l, k, ordered=True):
     """
