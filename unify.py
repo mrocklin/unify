@@ -15,7 +15,6 @@ It is modified in the following ways:
 3.  We provide generic interfaces to symbolic algebra libraries in Python.
 """
 
-
 from collections import namedtuple
 from itertools import combinations
 Compound = namedtuple('Compound', 'op args')

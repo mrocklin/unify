@@ -6,6 +6,7 @@ def is_associative(x):
     return isinstance(x, Compound) and issubclass(x.op, AssocOp)
 
 def is_commutative(x):
+    # return isinstance(x, Compound) and construct(x).is_commutative
     return isinstance(x, Compound) and _build(x).is_commutative
 
 def destruct(s):
@@ -17,6 +18,9 @@ def destruct(s):
     return Compound(s.__class__, tuple(map(destruct, s.args)))
 
 def _build(t):
+    # This function is the same as construct but builds the op in an
+    # autoevaluated way. We do this only to get is_commutative. This function
+    # should not be used otherwise.
     if isinstance(t, Variable):
         return t.arg
     if not isinstance(t, Compound):
