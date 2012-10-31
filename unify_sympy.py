@@ -17,6 +17,10 @@ def destruct(s):
         return s
     return Compound(s.__class__, tuple(map(destruct, s.args)))
 
+def rebuild(s):
+    """ Rebuild a SymPy expression using auto-evaluation """
+    return _build(destruct(s))
+
 def _build(t):
     # This function is the same as construct but builds the op in an
     # autoevaluated way. We do this only to get is_commutative. This function
